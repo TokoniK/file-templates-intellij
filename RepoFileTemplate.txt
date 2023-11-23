@@ -1,0 +1,13 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+#parse("File Header.java")
+
+#set ($index = $PACKAGE_NAME.lastIndexOf('.'))
+#set ($val1= $PACKAGE_NAME.substring(0, $index))
+#set( $entPkg = $val1+".entities" )
+import ${entPkg}.${NAME};
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ${NAME}Repository extends JpaRepository<${NAME}, Integer> {
+}
+
+

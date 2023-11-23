@@ -1,0 +1,21 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+#parse("File Header.java")
+
+#set ($index = $PACKAGE_NAME.lastIndexOf('.'))
+#set ($topPkg= $PACKAGE_NAME.substring(0, $index))
+#set( $lenN = $NAME.length())
+#set( $uName = $NAME.substring(0, 1).toLowerCase()+$NAME.substring(1, $lenN) )
+
+
+import ${topPkg}.entities.${NAME};
+import ${topPkg}.repos.${NAME}Repository;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ${NAME}Service extends AbstractService<${NAME}>{
+
+    public ${NAME}Service(${NAME}Repository ${uName}Repository) {
+
+        this.setRepo(${uName}Repository);
+    }
+}
