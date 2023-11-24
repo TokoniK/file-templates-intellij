@@ -16,6 +16,6 @@ public class ${NAME}Service extends AbstractService<${NAME}>{
 
     public ${NAME}Service(${NAME}Repository ${uName}Repository) {
 
-        this.setRepo(${uName}Repository);
+        super(${uName}Repository);
     }
 }
