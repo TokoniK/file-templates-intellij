@@ -1,0 +1,129 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+#parse("File Header.java")
+
+#set ($index = $PACKAGE_NAME.lastIndexOf('.'))
+#set ($val1= $PACKAGE_NAME.substring(0, $index))
+#set( $servicesPkg = $val1+".services" )
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import ${servicesPkg}.AbstractService;
+import ${servicesPkg}.AbstractService.ServiceResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import java.io.Serializable;
+import java.util.List;
+
+public abstract class AbstractController<E extends Serializable, S extends AbstractService<E>, D> {
+
+
+    private S service;
+
+
+    @GetMapping()
+    public ResponseEntity<List<E>> getAll(){
+        ServiceResponse<List<E>> ServiceResponse = service.getAll();
+
+        return ResponseEntity.status(ServiceResponse.getStatusCode()).body(ServiceResponse.getBody());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<E> getOne(@PathVariable Integer id, HttpServletRequest request) throws ResponseException {
+        ServiceResponse<E> ServiceResponse = service.getById(id);
+        if(!ServiceResponse.getStatusCode().is2xxSuccessful() && !ServiceResponse.getStatusCode().is1xxInformational())
+            throw new ResponseException(ServiceResponse, request.getRequestURI());
+
+        return ResponseEntity.status(ServiceResponse.getStatusCode()).body(ServiceResponse.getBody());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<E> delete(@PathVariable Integer id, HttpServletRequest request) throws  ResponseException{
+        ServiceResponse<E> ServiceResponse = service.deleteById(id);
+        if (!ServiceResponse.getStatusCode().is2xxSuccessful() && !ServiceResponse.getStatusCode().is1xxInformational())
+            throw new ResponseException(ServiceResponse, request.getRequestURI());
+
+        return ResponseEntity.status(ServiceResponse.getStatusCode()).body(ServiceResponse.getBody());
+
+    }
+
+    @PostMapping()
+    public ResponseEntity<E> create(@Valid @RequestBody D object, HttpServletRequest request) throws  ResponseException{
+
+        ServiceResponse<E> ServiceResponse = service.create(object);
+        if (!ServiceResponse.getStatusCode().is2xxSuccessful() && !ServiceResponse.getStatusCode().is1xxInformational())
+            throw new ResponseException(ServiceResponse, request.getRequestURI());
+
+        return ResponseEntity.status(ServiceResponse.getStatusCode()).body(ServiceResponse.getBody());
+
+    }
+
+    @PutMapping
+    public ResponseEntity<E> update(@Valid @RequestBody D object, HttpServletRequest request) throws  ResponseException{
+
+        ServiceResponse<E> ServiceResponse = service.update(object);
+        if (!ServiceResponse.getStatusCode().is2xxSuccessful() && !ServiceResponse.getStatusCode().is1xxInformational())
+            throw new ResponseException(ServiceResponse, request.getRequestURI());
+
+        return ResponseEntity.status(ServiceResponse.getStatusCode()).body(ServiceResponse.getBody());
+
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<E> updateById(@Valid @RequestBody D object, @PathVariable Integer id, HttpServletRequest request) throws  ResponseException{
+
+        ServiceResponse<E> ServiceResponse = service.updateById(object, id);
+        if (!ServiceResponse.getStatusCode().is2xxSuccessful() && !ServiceResponse.getStatusCode().is1xxInformational())
+            throw new ResponseException(ServiceResponse, request.getRequestURI());
+
+        return ResponseEntity.status(ServiceResponse.getStatusCode()).body(ServiceResponse.getBody());
+
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<E> patch(@RequestBody D object , @PathVariable Integer id, HttpServletRequest request) throws  ResponseException{
+
+        ServiceResponse<E> ServiceResponse = service.patchById(object, id);
+        if (!ServiceResponse.getStatusCode().is2xxSuccessful() && !ServiceResponse.getStatusCode().is1xxInformational())
+            throw new ResponseException(ServiceResponse, request.getRequestURI());
+
+        return ResponseEntity.status(ServiceResponse.getStatusCode()).body(ServiceResponse.getBody());
+
+    }
+
+    public void setService(S service){
+        this.service = service;
+    }
+
+
+}
+
+class ResponseException extends ResponseStatusException {
+
+
+    private final ServiceResponse<?> response;
+    private final String path;
+
+    public ResponseException(ServiceResponse<?> response, String path) {
+        super(response.getStatusCode());
+        this.response = response;
+        this.path = path;
+        response.setPath(path);
+    }
+
+    public ServiceResponse<?> getResponse() {
+        return response;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+}
